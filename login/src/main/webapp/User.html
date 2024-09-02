@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>User Page</title>
+    <style>
+     body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.navbar {
+    width: 100%;
+    background-color: #333;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+.navbar .left-buttons {
+    display: flex;
+    flex-grow: 1; /* Pushes the other items to the right */
+}
+
+.navbar .left-buttons button {
+    background-color: #444;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    margin: 0 5px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.navbar .left-buttons button:hover {
+    background-color: #555;
+}
+
+.navbar #adminName {
+    margin-right: auto; /* Pushes the left buttons to the right */
+    font-size: 16px;
+}
+
+.navbar .redirect-button {
+    margin-left: 10px;
+}
+
+.content {
+    margin-top: 60px; /* Offset for the fixed navbar */
+    width: 100%;
+    max-width: 800px;
+    display: none;
+    text-align: center;
+}
+
+.content.active {
+    display: block;
+}
+
+.form-container,
+.resources-container {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+table {
+    width: 100%;
+    border: 2px solid black;
+    border-collapse: collapse;
+    box-sizing: border-box;
+}
+
+th, td {
+    border: 2px solid black;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+th {
+    border: 2px solid black;
+    background-color: #f2f2f2;
+}
+
+.hidden {
+    display: none;
+}
+
+.active {
+    display: block;
+}
+
+form {
+    flex-direction: column;
+    
+}
+
+label {
+
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input, select {
+    width: 50%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type=submit] {
+    width: 50%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Centering the details container */
+#detailsContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%; /* Adjust width as needed */
+    max-width: 600px; /* Optional: max width for better layout */
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div id="adminName">${admin}</div>
+    <div class="left-buttons">
+        <button onclick="showContent('form')">Request Resource</button>
+		<button onclick="showContent('roleChange')">Role Change</button>
+        <button onclick="showContent('resources')">Show Resources</button>
+		<button onclick="showContent('requests')">Requests Status</button>
+		<button onclick="showContent('changePassword')">Change Password</button>
+		<!-- <button onclick="showContent('changeDetails')">Change Details</button> -->
+		
+       
+    </div>
+    <button class="redirect-button" onclick="logout()">Logout</button>
+  
+</div>
+
+ <div id="detailsContainer" class="hidden">
+        <form id="adminForm" onsubmit = "handleChangeSubmit(event)">
+            <label for="firstname">First Name:</label>
+            <input type="text" id="firstname" name="firstname" required><br>
+
+            <label for="lastname">Last Name:</label>
+            <input type="text" id="lastname" name="lastname" required><br>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required><br>
+
+            <label for="phone">Phone No:</label>
+            <input type="tel" id="phone" name="phone" required><br>
+
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+
+<div id="formContainer" class="content">
+    <div class="form-container">
+        <h2>Request Resource</h2>
+       <form onsubmit="handleFormSubmit(event)">
+            <label for="resourceDropdown">Resource name:</label>
+            
+            <select id="resourceDropdown" name="res_name">
+                <!-- Options will be populated here -->
+            </select><br><br>
+            <button id = "submit" type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+<div id="roleContainer" class="content">
+    <div class="role-container">
+        <h2>Role Change</h2>
+       <form onsubmit="handleFormSubmit(event)">
+          <label for="resourceDropdown">Resource name:</label>
+			<select id="resourceDropdown" name="res_name">
+			    <option value="Manager">Manager</option>
+			    <option value="Admin">Admin</option>
+			</select><br><br>	
+			<button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+
+
+<div id="changePasswordContainer" class="content">
+    <div class="changePassword-container">
+        <h2>Change Password</h2>
+        <form id="changePassword" method="POST">
+                <label for="p1"><b>Password</b></label>
+                <input id="p1" 
+                       type="password" 
+                       placeholder="Enter Password" 
+                       name="psw" 
+                       required 
+                       minlength="8" 
+                       maxlength="20" 
+                       pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,20}" 
+                       title="Password must be 8-20 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character (@, #, $, %, ^, &, +)." 
+                       aria-required="true">
+            
+                <label for="p2"><b>Confirm Password</b></label>
+                <input id="p2" 
+                       type="password" 
+                       placeholder="Confirm Password" 
+                       name="psw-repeat" 
+                       required>
+                       <br><br>
+          
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+
+<div id="resourcesContainer" class="content">
+    <div class="resources-container"></div>
+</div>
+
+<div id="requestContainer" class="content">
+    <div class="request-container"></div>
+</div>
+<script>
+let name;
+
+    async function showResources() {
+        try {
+            const response = await fetch(`http://localhost:9009/login/webapi/myresource/getUserRes/${username}`);
+            if (response.ok) {
+                const resources = await response.json();
+    			console.log(resources);
+               displayResources(resources);
+            } else {
+                console.error('Failed to fetch resources:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error fetching resources:', error);
+        }
+    }
+    
+    function displayResources(resources) {
+        const container = document.querySelector('#resourcesContainer .resources-container');
+        container.innerHTML = ''; // Clear previous contents
+        if (resources.length === 0) {
+            container.textContent = 'No resources found.';
+            return;
+        }
+        // Create table and table header
+        const table = document.createElement('table');
+        table.style.cssText = 'width: 100%; border-collapse: collapse;';
+
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        // Create and append header cells
+        ['Name','Action'].forEach(text => {
+            const th = document.createElement('th');
+            th.textContent = text;
+            th.style.cssText = 'border: 1px solid black; padding: 8px;';
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // Create table body
+        const tbody = document.createElement('tbody');
+        resources.forEach(resource => {
+            const row = document.createElement('tr');
+
+            // Create and append data cell with only res_name
+            const nameTd = document.createElement('td');
+            nameTd.textContent = resource.res_name;
+            nameTd.style.cssText = 'border: 1px solid black; padding: 8px;';
+            row.appendChild(nameTd);
+
+            const removeTd = document.createElement('td');
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove';
+            removeButton.className = 'remove-button';
+            removeButton.onclick = () => removeUserResource(resource.res_name);
+            removeTd.appendChild(removeButton);
+            row.appendChild(removeTd);
+            //
+            tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+        container.appendChild(table);
+    }
+    async function showRequests() {
+    	  try {
+    	        const response = await fetch(`http://localhost:9009/login/webapi/myresource/getUserReq/${name}`);
+    	        if (response.ok) {
+    	            const requests = await response.json();
+    	            console.log(requests);
+    	            displayRequests(requests);
+    	        } else {
+    	            console.error('Failed to fetch requests:', response.statusText);
+    	        }
+    	    } catch (error) {
+    	        console.error('Error fetching requests:', error);
+    	    }
+    }
+    function displayRequests(requests) {
+        const container = document.querySelector('#requestContainer .request-container');
+        container.innerHTML = ''; // Clear previous contents
+
+        if (!Array.isArray(requests) || requests.length === 0) {
+            container.textContent = 'No requests found.';
+            return;
+        }
+
+        // Create table and table header
+        const table = document.createElement('table');
+        table.style.cssText = 'width: 100%; border-collapse: collapse;';
+
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+
+        // Create and append header cells
+        ['Request Name', 'Date' ,  'Status'].forEach(text => {
+            const th = document.createElement('th');
+            th.textContent = text;
+            th.style.cssText = 'border: 2px solid black; padding: 8px; background-color: #f2f2f2;';
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // Create table body
+        const tbody = document.createElement('tbody');
+        requests.forEach(request => {
+            const row = document.createElement('tr');
+
+            // Create and append data cells
+            const nameTd = document.createElement('td');
+            nameTd.textContent = request.resourceName || 'N/A'; // Handle missing data gracefully
+            nameTd.style.cssText = 'border: 2px solid black; padding: 8px;';
+            row.appendChild(nameTd);
+
+            const dateTd = document.createElement('td');
+            dateTd.textContent = request.requestDate || 'N/A'; // Handle missing data gracefully
+            dateTd.style.cssText = 'border: 2px solid black; padding: 8px;';
+            row.appendChild(dateTd);
+
+            const statusTd = document.createElement('td');
+            statusTd.textContent = request.status || 'N/A'; // Handle missing data gracefully
+            statusTd.style.cssText = 'border: 2px solid black; padding: 8px;';
+            row.appendChild(statusTd);
+
+            tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+
+        // Append the table to the container
+        container.appendChild(table);
+    }
+
+    
+    /*drop down*/
+    
+    async function fetchAvailableResources() {
+    try {
+        const response = await fetch(`http://localhost:9009/login/webapi/myresource/getAvailableResources/${username}`);
+        if (response.ok) {
+            const resources = await response.json();
+            populateDropdown(resources);
+        } else {
+            console.error('Failed to fetch available resources:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error fetching available resources:', error);
+    }
+}
+
+function populateDropdown(resources) {
+    const dropdown = document.getElementById('resourceDropdown');
+    dropdown.innerHTML = ''; // Clear existing options
+
+    if (resources.length === 0) {
+        dropdown.innerHTML = '<option value="">No resources available</option>';
+        return;
+    }
+
+    // Create and append options
+    resources.forEach(resource => {
+        const option = document.createElement('option');
+        option.value = resource.res_name;
+        option.textContent = resource.res_name;
+        dropdown.appendChild(option);
+    });
+}
+// remove user
+    async function removeUserResource(resourceName) {
+        if (confirm(`Are you sure you want to remove the resource: ${resourceName}, ${name}?`)) {
+            try {
+            	console.log('Resource Name:', resourceName);
+            	const encodedResourceName = encodeURIComponent(resourceName);
+                const response = await fetch(`http://localhost:9009/login/webapi/myresource/removeUserRes/${encodedResourceName}/${name}`, {
+                    method: 'DELETE'
+                });
+            	console.log('Resource Name:', resourceName);
+
+                const data = await response.text();
+                alert(data.message || 'Resource removed successfully'); // Show the response from the server
+                showContent('resources'); // Refresh the resource list
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error removing resource');
+            }
+        }
+    }
+
+
+    
+    //set username
+    function getQueryParam(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        // Set username
+        username = getQueryParam('username');
+        if (username) {
+            name = username;
+            document.getElementById('adminName').textContent = `Welcome, ${username}`;
+
+            fetch(`http://localhost:9009/login/webapi/myresource/getUserDetails/${name}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    document.getElementById('firstname').value = data.firstname || '';
+                    document.getElementById('lastname').value = data.lastname || '';
+                    document.getElementById('email').value = data.email || '';
+                    document.getElementById('phone').value = data.phone || '';
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        document.getElementById('adminName').addEventListener('click', () => {
+            showContent('detailsForm');
+        });
+
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            console.log('Logged out');
+            // Optionally, redirect to login page
+        });
+        showContent('detailsForm');
+    });
+
+    function handleFormSubmit(event) {
+        event.preventDefault(); 
+
+        const formData = new FormData(event.target);
+        const res_name = formData.get('res_name');
+        
+        console.log('ResName:', res_name); // Logging the res_name
+
+        // Construct the URL for the POST request
+        const url = 'http://localhost:9009/login/webapi/myresource/addReq';
+
+        // Make a POST request to the URL with form-encoded data
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+            	userName: name,
+                reqName: res_name
+            })
+        })
+        .then(response => response.text())
+        .then(data => {
+            console.log('Success:', data);
+            alert(res_name+" requested successfully");
+            showContent('form'); // Optionally hide the form and show the table again
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error adding resource');
+        });
+    }
+    //handle change submit
+      function handleChangeSubmit(event) {
+        event.preventDefault(); // Prevent the default form submission
+        const formData = new FormData(event.target);
+        const  firstname = formData.get('firstname');
+        const  lastname = formData.get('lastname');
+        const  email = formData.get('email');
+        const  phone = formData.get('phone');
+
+	
+        fetch('http://localhost:9009/login/webapi/myresource/changeDetails', {
+            method: 'POST',
+            body: new URLSearchParams({
+            	username:name,
+            	firstname:firstname,
+            	lastname:lastname,
+            	email:email,
+            	phone:phone
+            })
+        })
+        .then(response => response.text())
+        .then(data => {
+            alert(data); 
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error making changes');
+        });
+    }
+    
+    //change password
+document.getElementById('changePassword').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    let p1 = document.getElementById('p1').value;
+    let p2 = document.getElementById('p2').value;
+    if (p1 !== p2) {
+        window.alert("Password mismatch"); // Alert if passwords do not match
+        return; // Exit the function if passwords do not match
+    }
+    const urlEncodedData = new URLSearchParams({
+        user: name,
+        psw: p1
+    }).toString();
+
+    fetch('webapi/myresource/changePassword', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: urlEncodedData // Send data as URL-encoded string
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+        }
+        // Try to parse the response as JSON
+        return response.text().then(text => {
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                throw new Error('Response is not valid JSON: ' + text);
+            }
+        });
+    })
+    .then(result => {
+        // Log the result to ensure it's in the correct format
+        console.log('Success:', result);
+
+        // Display the result in an alert
+        const message = result.message || 'Password changed successfully';
+        window.alert(message);
+    })
+    .catch(error => {
+        // Handle any errors
+        console.error('Error:', error);
+        window.alert('An error occurred: ' + error.message);
+    });
+});
+
+
+
+    /////////
+
+  
+
+    function showContent(section) {
+        document.getElementById('formContainer').classList.toggle('active', section === 'form');
+        document.getElementById('roleContainer').classList.toggle('active', section === 'roleChange');
+        document.getElementById('resourcesContainer').classList.toggle('active', section === 'resources');
+        document.getElementById('requestContainer').classList.toggle('active', section === 'requests');
+        document.getElementById('changePasswordContainer').classList.toggle('active', section === 'changePassword');
+        document.getElementById('detailsContainer').classList.toggle('active', section === 'detailsForm');
+
+
+        if (section === 'resources') {
+            showResources(); // Load resources when showing the table
+        }
+        if (section === 'requests') {
+            showRequests(); // Load requests when showing the table
+        }
+        else if (section === 'form') {
+            fetchAvailableResources(); // Load available resources for the dropdown
+        }
+    }
+    
+    //clear the url param
+    
+    function clearSensitiveData() {
+                document.querySelectorAll('.nav-credentials').forEach(el => el.textContent = '');
+                document.body.innerHTML = ''; 
+            }
+    //logout function
+    //logout
+	function logout() {
+            // Clear session storage
+            sessionStorage.clear();
+ 
+            // Invalidate session on the server side
+            fetch('http://localhost:9009/login/webapi/myresource/logout', {
+                method: 'POST',
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Clear sensitive information
+                    clearSensitiveData();
+ 
+                    // Redirect to login page
+                    redirectToLogin();
+                } else {
+                    alert("Logout failed. Please try again.");
+                }
+            });
+ 
+            // Clear sensitive data immediately
+            clearSensitiveData();
+ 
+            // Function to clear sensitive data
+            function clearSensitiveData() {
+                // Example: Clear any user-specific information in the navigation bar
+                document.querySelectorAll('.nav-credentials').forEach(el => el.textContent = '');
+                // Optionally clear other elements or hide them
+                document.body.innerHTML = '';  // Clear the entire page content
+            }
+ 
+            // Function to redirect to the login page and handle back navigation
+            function redirectToLogin() {
+                // Replace the current history entry with the login page
+                history.replaceState(null, null, 'login.html');
+ 
+                // Repeat the pushState 10 times to prevent back navigation
+                for (let i = 0; i < 100; i++) {
+                    history.pushState(null, null, 'login.html');
+                }
+ 
+                // Redirect immediately to the login page
+                window.location.replace('login.html');
+            }
+ 
+            // Prevent back navigation on the login page
+            window.addEventListener('load', function() {
+                // Repeat the pushState 10 times to prevent back navigation
+                for (let i = 0; i < 100; i++) {
+                    history.pushState(null, null, 'login.html');
+                }
+ 
+                // Add popstate event listener to handle back button navigation
+                window.addEventListener('popstate', function() {
+                    // Repeat the replace 10 times to make sure user can't go back
+                    for (let i = 0; i < 100; i++) {
+                        window.location.replace('login.html');
+                    }
+                });
+            });
+ 
+            // Function to prevent browser caching of sensitive information
+            function noCache() {
+                // Set meta tags for no-cache
+                let metaTags = [
+                    { name: 'cache-control', content: 'no-cache, no-store, must-revalidate' },
+                    { name: 'pragma', content: 'no-cache' },
+                    { name: 'expires', content: '0' }
+                ];
+ 
+                metaTags.forEach(metaTag => {
+                    let meta = document.createElement('meta');
+                    meta.setAttribute('http-equiv', metaTag.name);
+                    meta.content = metaTag.content;
+                    document.head.appendChild(meta);
+                });
+ 
+                // Additionally, set response headers on the server side to prevent caching
+            }
+        }
+    /*
+    function logout() {
+        // Clear session storage
+        sessionStorage.clear();
+
+        // Invalidate session on the server side
+        fetch('http://localhost:9009/login/webapi/myresource/logout', { method: 'POST', credentials: 'same-origin' })
+        .then(response => {
+            if (response.ok) {
+            	clearSensitiveData();
+                // Redirect to login page after successful logout
+                window.location.href = 'http://localhost:9009/login/login.html';
+            } else {
+                alert("Logout failed. Please try again.");
+            }
+        });
+
+        // Disable back navigation
+        setTimeout(function() {
+            history.pushState(null, null, 'login.html');
+        }, 0);
+
+        window.addEventListener('popstate', function(event) {
+            history.pushState(null, null, ' ');
+        });
+    }
+    */
+    
+    
+   
+
+</script>
+
+</body>
+</html>

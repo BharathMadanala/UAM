@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Forgot Password</title>
+<link rel = "stylesheet" href = "login.css"></link>
+
+<script>
+        // Function to validate the password fields
+        function validatePasswords() {
+            const password = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const updateButton = document.getElementById('update-password-button');
+            const passwordError = document.getElementById('password-error');
+ 
+            if (password !== confirmPassword) {
+                passwordError.textContent = 'Passwords do not match.';
+                updateButton.di sabled = true;
+            } else {
+                passwordError.textContent = '';
+                updateButton.disabled = false;
+            }
+        }
+</script>
+</head>
+<body class='content'>
+		<div class="main">
+			<h1>Forgot Password</h1>
+			<form  action="webapi/myresource/forgetpassword" method="POST">
+			<div>
+			<label for="username">Enter Username:</label>
+			<input type="text" id="username" name="username" required>
+			</div>
+			<div>
+			<label for="email">Enter Email:</label>
+			<input type="email" id="email" name="email" required>
+			</div>
+			<div>
+			<label for="new-password">Enter New Password:</label>
+			<input type="password" id="new-password" name="new-password" 
+			                   required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+			                   title="Must contain at least one number, one uppercase and lowercase letter, and at least 8 or more characters"
+			                   oninput="validatePasswords()">
+			</div>
+			<div>
+			<label for="confirm-password">Confirm Password:</label>
+			<input type="password" id="confirm-password" name="confirm-password" 
+			                   required oninput="validatePasswords()">
+			</div>
+			<div id="password-error" class="error"></div><br>
+			<div>
+			<button class='btn-form' type="submit" id="update-password-button" disabled>Update Password</button>
+			</div>
+			</form>
+		</div>
+</body>
+</html>

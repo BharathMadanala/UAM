@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-sizing: border-box;
+        }
+
+        .navbar .left-buttons {
+            display: flex;
+            flex-grow: 1; /* Pushes the other items to the right */
+        }
+
+        .navbar .left-buttons button {
+            background-color: #444;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .navbar .left-buttons button:hover {
+            background-color: #555;
+        }
+
+        .navbar #adminName {
+            margin-right: auto; /* Pushes the left buttons to the right */
+            font-size: 16px;
+        }
+
+        .navbar .redirect-button {
+            margin-left: 10px;
+        }
+
+        .content {
+            margin-top: 60px; /* Offset for the fixed navbar */
+            width: 100%;
+            max-width: 800px;
+            display: none;
+            text-align: center;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        .form-container,
+        .resources-container,
+        .team-container,
+        .user-container {
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border: 2px solid black;
+            border-collapse: collapse;
+            box-sizing: border-box;
+        }
+
+        th, td {
+            border: 2px solid black;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        th {
+            border: 2px solid black;
+            background-color: #f2f2f2;
+        }
+      .hidden {
+    display: none;
+}
+
+.active {
+    display: block;
+}
+
+form {
+    flex-direction: column;
+    
+}
+
+label {
+
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input, select {
+    width: 50%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type=submit] {
+    width: 50%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Centering the details container */
+#detailsContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%; /* Adjust width as needed */
+    max-width: 600px; /* Optional: max width for better layout */
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+        
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+     <div id="adminName">Welcome, guest</div>
+    <div class="left-buttons">
+        <button onclick="showContent('form')">Request Resource</button>
+       <button onclick="showContent('roleChange')">Become Manager</button> 
+        <button onclick="showContent('resources')">Show Resources</button>
+        <button onclick="showContent('team')">Show Team</button>
+        <button onclick="showContent('addToTeam')">Add member</button>
+        <button onclick="showContent('requests')">Requests Status</button>
+        <button onclick="showContent('changePassword')">Change Password</button>
+        
+    </div>
+    <button class="redirect-button" onclick="logout()">Logout</button>
+</div>
+
+<div id="formContainer" class="content">
+    <div class="form-container">
+        <h2>Request Resource</h2>
+        <form onsubmit="handleFormSubmit(event)">
+            <label for="resourceDropdown">Resource name:</label>
+            <select id="resourceDropdown" name="res_name">
+                <!-- Options will be populated here -->
+            </select><br><br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+<div id="roleContainer" class="content">
+    <div class="role-container">
+        <h2>Appoint a user as Manager</h2>
+       <form onsubmit="handleRoleSubmit(event)">
+          <label for="resourceUserDropdown">User names:</label>
+			<select id="resourceUserDropdown" name="res_name">
+                <!-- Options will be populated here -->
+			</select><br><br>	
+			<button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+<div id="changePasswordContainer" class="content">
+    <div class="changePassword-container">
+        <h2>Change Password</h2>
+        <form id="changePassword" method="POST">
+                <label for="p1"><b>Password</b></label>
+                <input id="p1" 
+                       type="password" 
+                       placeholder="Enter Password" 
+                       name="psw" 
+                       required 
+                       minlength="8" 
+                       maxlength="20" 
+                       pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,20}" 
+                       title="Password must be 8-20 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character (@, #, $, %, ^, &, +)." 
+                       aria-required="true">
+            <br><br>
+                <label for="p2"><b>Confirm Password</b></label>
+                <input id="p2" 
+                       type="password" 
+                       placeholder="Confirm Password" 
+                       name="psw-repeat" 
+                       required>
+          <br><br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+ <div id="detailsContainer" class="hidden">
+        <form id="adminForm" onsubmit = "handleChangeSubmit(event)">
+            <label for="firstname">First Name:</label>
+            <input type="text" id="firstname" name="firstname" required><br>
+
+            <label for="lastname">Last Name:</label>
+            <input type="text" id="lastname" name="lastname" required><br>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required><br>
+
+            <label for="phone">Phone No:</label>
+            <input type="tel" id="phone" name="phone" required><br>
+
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+<div id="resourcesContainer" class="content">
+    <div class="resources-container"></div>
+</div>
+
+<div id="teamContainer" class="content">
+    <div class="team-container"></div>
+</div>
+
+<div id="userContainer" class="content">
+    <div class="user-container"></div>
+</div>
+
+<div id="addToTeamContainer" class="content">
+    <div class="addToTeam-container"></div>
+</div>
+
+<div id="requestContainer" class="content">
+    <div class="request-container"></div>
+</div>
+<script>
+let name;
+async function showResources() {
+    try {
+        const response = await fetch(`http://localhost:9009/login/webapi/myresource/getUserRes/${name}`);
+        if (response.ok) {
+            const resources = await response.json();
+            displayResources(resources);
+        } else {
+            console.error('Failed to fetch resources:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error fetching resources:', error);
+    }
+}
+
+function displayResources(resources) {
+    const container = document.querySelector('#resourcesContainer .resources-container');
+    container.innerHTML = ''; // Clear previous contents
+    if (resources.length === 0) {
+        container.textContent = 'No resources found.';
+        return;
+    }
+    // Create table and table header
+    const table = document.createElement('table');
+    table.style.cssText = 'width: 100%; border-collapse: collapse;';
+
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    // Create and append header cells
+    ['Name','Action'].forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        th.style.cssText = 'border: 1px solid black; padding: 8px;';
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Create table body
+    const tbody = document.createElement('tbody');
+    resources.forEach(resource => {
+        const row = document.createElement('tr');
+
+        // Create and append data cell with only res_name
+        const nameTd = document.createElement('td');
+        nameTd.textContent = resource.res_name;
+        nameTd.style.cssText = 'border: 1px solid black; padding: 8px;';
+        row.appendChild(nameTd);
+
+        const removeTd = document.createElement('td');
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'Remove';
+        removeButton.className = 'remove-button';
+        removeButton.onclick = () => removeUserResource(resource.res_name);
+        removeTd.appendChild(removeButton);
+        row.appendChild(removeTd);
+        tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+
+    container.appendChild(table);
+}
+
+async function fetchAvailableResources() {
+    try {
+        const response = await fetch(`http://localhost:9009/login/webapi/myresource/getAvailableResources/${name}`);
+        if (response.ok) {
+            const resources = await response.json();
+            populateDropdown(resources);
+        } else {
+            console.error('Failed to fetch available resources:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error fetching available resources:', error);
+    }
+}
+
+function populateDropdown(resources) {
+    const dropdown = document.getElementById('resourceDropdown');
+    dropdown.innerHTML = ''; // Clear existing options
+
+    if (resources.length === 0) {
+        dropdown.innerHTML = '<option value="">No resources available</option>';
+        return;
+    }
+
+    // Create and append options
+    resources.forEach(resource => {
+        const option = document.createElement('option');
+        option.value = resource.res_name;
+        option.textContent = resource.res_name;
+        dropdown.appendChild(option);
+    });
+}
+//populate user dropdown for change role
+function populateUserDropdown(resources) {
+    const dropdown = document.getElementById('resourceUserDropdown');
+    dropdown.innerHTML = ''; // Clear existing options
+
+    if (resources.length === 0) {
+        dropdown.innerHTML = '<option value="">No resources available</option>';
+        return;
+    }
+
+    // Create and append options
+    resources.forEach(resource => {
+        const option = document.createElement('option');
+        option.value = resource; // Set the value to the resource name
+        option.textContent = resource; // Set the display text to the resource name
+        dropdown.appendChild(option);
+    });
+}
+//
+
+async function removeUserResource(resourceName) {
+    if (confirm(`Are you sure you want to remove the resource: ${resourceName}, ${name}?`)) {
+        try {
+            console.log('Resource Name:', resourceName);
+            const encodedResourceName = encodeURIComponent(resourceName);
+            const response = await fetch(`http://localhost:9009/login/webapi/myresource/removeUserRes/${encodedResourceName}/${name}`, {
+                method: 'DELETE'
+            });
+            console.log('Resource Name:', resourceName);
+
+            const data = await response.text();
+            alert(data.message || 'Resource removed successfully'); // Show the response from the server
+            showContent('resources'); // Refresh the resource list
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error removing resource');
+        }
+    }
+}
+
+//fetch and show team members
+async function showTeam() {
+    try {
+        const response = await fetch(`http://localhost:9009/login/webapi/myresource/getTeamMembers/${name}`);
+        if (response.ok) {
+            const teamMembers = await response.json();
+            populateUserDropdown(teamMembers);
+            displayTeamMembers(teamMembers);
+        } else {
+            console.error('Failed to fetch team members:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error fetching team members:', error);
+    }
+}
+function displayTeamMembers(data) {
+    const resultContainer = document.getElementById('teamContainer');
+
+    // Check if the data is an array
+    if (!Array.isArray(data)) {
+        console.error('Expected an array of usernames, but got:', data);
+        resultContainer.innerHTML = 'Error: Unexpected data format.';
+        return;
+    }
+
+    // Create a table and table header
+    const table = document.createElement('table');
+    table.style.cssText = 'width: 100%; border-collapse: collapse;';
+
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+
+    // Create and append header cells
+    ['User Name','Remove'].forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        th.style.cssText = 'border: 1px solid black; padding: 8px;';
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Create table body
+    const tbody = document.createElement('tbody');
+    data.forEach(username => {
+        const row = document.createElement('tr');
+
+        // Create and append data cells
+        const td = document.createElement('td');
+        td.textContent = username;
+        td.style.cssText = 'border: 2px solid black; padding: 8px;';
+        row.appendChild(td);
+		//remove button
+		 const removeTd = document.createElement('td');
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove';
+            removeButton.className = 'remove-button';
+            
+            removeButton.onclick = () => removeUserFromTeam(username);
+            removeTd.appendChild(removeButton);
+            row.appendChild(removeTd);
+        tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+
+    // Clear previous contents and append the new table
+    resultContainer.innerHTML = '';
+    resultContainer.appendChild(table);
+}
+//remove user from team
+async function removeUserFromTeam(resourceName) {
+        if (confirm(`Are you sure you want to remove ${resourceName}: ${username}?`)) {
+            try {
+            	const encodedResourceName = encodeURIComponent(resourceName);
+                const response = await fetch(`http://localhost:9009/login/webapi/myresource/removeUserFromTeam/${encodedResourceName}`, {
+                    method: 'POST'	
+                });
+                if(response.ok) showTeam();
+                const data = await response.text();
+                alert(data.message || 'Resource removed successfully'); // Show the response from the server
+                showContent('resources'); // Refresh the resource list
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error removing resource');
+            }
+        }
+    }
+    
+
+//add to team container
+async function addToTeam() {
+    try {
+        const response = await fetch(`http://localhost:9009/login/webapi/myresource/addToTeam`);
+        if (response.ok) {
+            const teamMembers = await response.json();
+            console.log(teamMembers);
+            displayAddToTeam(teamMembers);
+        } else {
+            console.error('Failed to fetch team members:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error fetching team members:', error);
+    }
+}
+function displayAddToTeam(data) {
+    const resultContainer = document.getElementById('addToTeamContainer');
+
+    // Check if the data is an array
+    if (!Array.isArray(data)) {
+        console.error('Expected an array of usernames, but got:', data);
+        resultContainer.innerHTML = 'Error: Unexpected data format.';
+        return;
+    }
+
+    // Create a table and table header
+    const table = document.createElement('table');
+    table.style.cssText = 'width: 100%; border-collapse: collapse;';
+
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+
+    // Create and append header cells
+    ['User Name','Add to team'].forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        th.style.cssText = 'border: 1px solid black; padding: 8px;';
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Create table body
+    const tbody = document.createElement('tbody');
+    data.forEach(username => {
+        const row = document.createElement('tr');
+
+        // Create and append data cells
+        const td = document.createElement('td');
+        td.textContent = username;
+        td.style.cssText = 'border: 2px solid black; padding: 8px;';
+        row.appendChild(td);
+        
+        const submitTd = document.createElement('td');
+        const submitButton = document.createElement('button');
+        submitButton.textContent = 'Add';
+        submitButton.className = 'submit-button';
+        submitButton.onclick = () => submitMember(username,name);
+        submitTd.appendChild(submitButton);
+        row.appendChild(submitTd);
+
+        tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+
+    // Clear previous contents and append the new table
+    resultContainer.innerHTML = '';
+    resultContainer.appendChild(table);
+}
+async function submitMember(username,name) {
+    if (confirm(`Are you sure you want to add the employee: ${username} to ${name}?`)) {
+        try {
+        	console.log('User Name:', username);
+        	const encodedUserName = encodeURIComponent(username);
+        	const encodedName = encodeURIComponent(name);
+            const response = await fetch(`http://localhost:9009/login/webapi/myresource/addMember/${encodedUserName}/${encodedName}`, {
+                method: 'POST'
+            });
+            const data = await response.text();
+            console.log(data);
+            alert(data.message || 'User added successfully'); // Show the response from the server
+            showContent('addToTeam'); // Refresh the resource list
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error adding user');
+        }
+    }
+}
+//appoint member as the manager of team
+async function appointManager(username,name) {
+    if (confirm(`Are you sure you want to appoint the employee: ${username} as manager inplace of ${name}?`)) {
+        try {
+        	const encodedEmployee = encodeURIComponent(name);
+        	const encodedManager = encodeURIComponent(username);
+        	alert(encodedEmployee+" : "+ encodedManager);
+            const response = await fetch(`http://localhost:9009/login/webapi/myresource/changeManager/${encodedEmployee}/${encodedManager}`, {
+                method: 'POST'
+            });
+            const data = await response.text();
+            console.log(data);
+            alert(data.message || 'User appointed as manager successfully'); 
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error adding user');
+        }
+    }
+}
+//change password
+document.getElementById('changePassword').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    let p1 = document.getElementById('p1').value;
+    let p2 = document.getElementById('p2').value;
+    if (p1 !== p2) {
+        window.alert("Password mismatch"); // Alert if passwords do not match
+        return; // Exit the function if passwords do not match
+    }
+    const urlEncodedData = new URLSearchParams({
+        user: name,
+        psw: p1
+    }).toString();
+
+    fetch('webapi/myresource/changePassword', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: urlEncodedData // Send data as URL-encoded string
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+        }
+        // Try to parse the response as JSON
+        return response.text().then(text => {
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                throw new Error('Response is not valid JSON: ' + text);
+            }
+        });
+    })
+    .then(result => {
+        // Log the result to ensure it's in the correct format
+        console.log('Success:', result);
+
+        // Display the result in an alert
+        const message = result.message || 'Password changed successfully';
+        window.alert(message);
+    })
+    .catch(error => {
+        // Handle any errors
+        console.error('Error:', error);
+        window.alert('An error occurred: ' + error.message);
+    });
+});
+
+//handle change submit
+function handleChangeSubmit(event) {
+  event.preventDefault(); // Prevent the default form submission
+  const formData = new FormData(event.target);
+  const  firstname = formData.get('firstname');
+  const  lastname = formData.get('lastname');
+  const  email = formData.get('email');
+  const  phone = formData.get('phone');
+
+
+  fetch('http://localhost:9009/login/webapi/myresource/changeDetails', {
+      method: 'POST',
+      body: new URLSearchParams({
+      	username:name,
+      	firstname:firstname,
+      	lastname:lastname,
+      	email:email,
+      	phone:phone
+      })
+  })
+  .then(response => response.text())
+  .then(data => {
+      alert(data); 
+  })
+  .catch(error => {
+      console.error('Error:', error);
+      alert('Error making changes');
+  });
+}
+
+//for  username
+function getQueryParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Set username
+    username = getQueryParam('username');
+    if (username) {
+        name = username;
+
+        document.getElementById('adminName').textContent = `Welcome, ${username}`;
+
+        // Fetch and populate user details once name is set
+        fetch(`http://localhost:9009/login/webapi/myresource/getUserDetails/${name}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                // Populate form fields with the received data
+                document.getElementById('firstname').value = data.firstname || '';
+                document.getElementById('lastname').value = data.lastname || '';
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('phone').value = data.phone || '';
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    }
+
+    document.getElementById('adminName').addEventListener('click', () => {
+        showContent('detailsForm');
+    });
+	
+   
+
+   
+});
+
+
+function redirectToAnotherPage() {
+    window.location.href = 'http://localhost:9009/login/login.html'; // Replace with your URL
+}
+
+function showContent(section) {
+    document.getElementById('formContainer').classList.toggle('active', section === 'form');
+    document.getElementById('roleContainer').classList.toggle('active', section === 'roleChange');
+    document.getElementById('resourcesContainer').classList.toggle('active', section === 'resources');
+    document.getElementById('teamContainer').classList.toggle('active', section === 'team');
+    document.getElementById('userContainer').classList.toggle('active', section === 'checkUser');
+    document.getElementById('requestContainer').classList.toggle('active', section === 'requests');
+    document.getElementById('addToTeamContainer').classList.toggle('active', section === 'addToTeam');
+    document.getElementById('changePasswordContainer').classList.toggle('active', section === 'changePassword');
+    document.getElementById('detailsContainer').classList.toggle('active', section === 'detailsForm');
+
+
+    if (section === 'resources') {
+        showResources(); // Load resources when showing the table
+    } else if (section === 'form') {
+        fetchAvailableResources();
+    }
+    else if(section === 'team' || section === 'roleChange')
+   	{
+   		showTeam();
+   	}
+    else if (section === 'requests') {
+        showRequests(); // Load requests when showing the table
+    }
+    else if (section === 'addToTeam') {
+    	addToTeam(); // Load requests when showing the table
+    }
+    
+}
+//display requests status
+async function showRequests() {
+	  try {
+	        const response = await fetch(`http://localhost:9009/login/webapi/myresource/getUserReq/${name}`);
+	        if (response.ok) {
+	            const requests = await response.json();
+	            console.log(requests);
+	            displayRequests(requests);
+	        } else {
+	            console.error('Failed to fetch requests:', response.statusText);
+	        }
+	    } catch (error) {
+	        console.error('Error fetching requests:', error);
+	    }
+}
+function displayRequests(requests) {
+    const container = document.querySelector('#requestContainer .request-container');
+    container.innerHTML = ''; // Clear previous contents
+
+    if (!Array.isArray(requests) || requests.length === 0) {
+        container.textContent = 'No requests found.';
+        return;
+    }
+
+    // Create table and table header
+    const table = document.createElement('table');
+    table.style.cssText = 'width: 100%; border-collapse: collapse;';
+
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+
+    // Create and append header cells
+    ['Resource Name', 'Date' ,  'Status'].forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        th.style.cssText = 'border: 2px solid black; padding: 8px; background-color: #f2f2f2;';
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Create table body
+    const tbody = document.createElement('tbody');
+    requests.forEach(request => {
+        const row = document.createElement('tr');
+
+        // Create and append data cells
+        const nameTd = document.createElement('td');
+        nameTd.textContent = request.resourceName || 'N/A'; // Handle missing data gracefully
+        nameTd.style.cssText = 'border: 2px solid black; padding: 8px;';
+        row.appendChild(nameTd);
+
+        const dateTd = document.createElement('td');
+        dateTd.textContent = request.requestDate || 'N/A'; // Handle missing data gracefully
+        dateTd.style.cssText = 'border: 2px solid black; padding: 8px;';
+        row.appendChild(dateTd);
+
+        const statusTd = document.createElement('td');
+        statusTd.textContent = request.status || 'N/A'; // Handle missing data gracefully
+        statusTd.style.cssText = 'border: 2px solid black; padding: 8px;';
+        row.appendChild(statusTd);
+
+        tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+
+    // Append the table to the container
+    container.appendChild(table);
+}
+//handle request
+function handleFormSubmit(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    const formData = new FormData(event.target);
+    const res_name = formData.get('res_name');
+    
+    console.log('ResName:', res_name); 
+    const url = 'http://localhost:9009/login/webapi/myresource/addReq';
+
+    // Make a POST request to the URL with form-encoded data
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+        	userName: name,
+            reqName: res_name
+        })
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log('Success:', data);
+        showContent('form'); 
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error adding resource');
+    });
+}
+//handle role change
+function handleRoleSubmit(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    const formData = new FormData(event.target);
+    const res_name = formData.get('res_name');
+    
+    const url = 'http://localhost:9009/login/webapi/myresource/addReq';
+
+    // Make a POST request to the URL with form-encoded data
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+        	userName: name,
+            reqName: 'Admin'
+        })
+    })
+    .then(response => response.text())
+    .then(data => {
+       
+        showContent('roleChange'); // Optionally hide the form and show the table again
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error adding resource');
+    });
+}
+//logout
+//logout
+	function logout() {
+            sessionStorage.clear();
+             fetch('http://localhost:9009/login/webapi/myresource/logout', {
+                method: 'POST',
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.ok) {
+                    clearSensitiveData();
+                     redirectToLogin();
+                } else {
+                    alert("Logout failed. Please try again.");
+                }
+            });
+             clearSensitiveData();
+            // Function to clear sensitive data
+            function clearSensitiveData() {
+                document.querySelectorAll('.nav-credentials').forEach(el => el.textContent = '');
+                document.body.innerHTML = '';  // Clear the entire page content
+            }
+             function redirectToLogin() {
+                history.replaceState(null, null, 'login.html');
+                 for (let i = 0; i < 100; i++) {
+                    history.pushState(null, null, 'login.html');
+                }
+                 window.location.replace('login.html');
+            }
+ 
+            // Prevent back navigation on the login page
+            window.addEventListener('load', function() {
+                // Repeat the pushState 10 times to prevent back navigation
+                for (let i = 0; i < 100; i++) {
+                    history.pushState(null, null, 'login.html');
+                }
+ 
+                // Add popstate event listener to handle back button navigation
+                window.addEventListener('popstate', function() {
+                    // Repeat the replace 10 times to make sure user can't go back
+                    for (let i = 0; i < 100; i++) {
+                        window.location.replace('login.html');
+                    }
+                });
+            });
+ 
+            // Function to prevent browser caching of sensitive information
+            function noCache() {
+                // Set meta tags for no-cache
+                let metaTags = [
+                    { name: 'cache-control', content: 'no-cache, no-store, must-revalidate' },
+                    { name: 'pragma', content: 'no-cache' },
+                    { name: 'expires', content: '0' }
+                ];
+ 
+                metaTags.forEach(metaTag => {
+                    let meta = document.createElement('meta');
+                    meta.setAttribute('http-equiv', metaTag.name);
+                    meta.content = metaTag.content;
+                    document.head.appendChild(meta);
+                });
+ 
+                // Additionally, set response headers on the server side to prevent caching
+            }
+        }
+
+/*
+function logout() {
+    // Clear session storage
+    sessionStorage.clear();
+
+    // Invalidate session on the server side
+    fetch('http://localhost:9009/login/webapi/myresource/logout', { method: 'POST', credentials: 'same-origin' })
+    .then(response => {
+        if (response.ok) {
+            // Redirect to login page after successful logout
+            window.location.href = 'http://localhost:9009/login/login.html';
+        } else {
+            alert("Logout failed. Please try again.");
+        }
+    });
+
+    // Disable back navigation
+    setTimeout(function() {
+        history.pushState(null, null, 'login.html');
+    }, 0);
+
+    window.addEventListener('popstate', function(event) {
+        history.pushState(null, null, 'login.html');
+    });
+}
+*/
+
+
+</script>
+
+</body>
+</html>

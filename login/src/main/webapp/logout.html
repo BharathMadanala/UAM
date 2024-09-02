@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Logged Out</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+</head>
+<body>
+  <div class="main">
+    <h3>You have been logged out.</h3>
+    <p><a href="login.html">Return to Login Page</a></p>
+  </div>
+</body>
+<script>
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        // If the page was loaded from cache, reload it
+        window.location.reload();
+    }
+});
+</script>
+</html>
